@@ -16,12 +16,12 @@ app = fastapi.FastAPI(docs_url=None, redoc_url=None)
 dagger_password = "\n"
 restart_password = ""
 
-WIELD_PATH = "/home/dagger/wield"
+SHDW_NODE_PATH = "/home/dagger/shdw-node"
 KEYGEN_PATH = "/home/dagger/shdw-keygen"
 ID_PATH = "/home/dagger/id.json"
-WIELD_URL = "https://shdw-drive.genesysgo.net/4xdLyZZJzL883AbiZvgyWKf2q55gcZiMgMkDNQMnyFJC/wield-latest"
+SHDW_NODE_URL = "https://shdw-drive.genesysgo.net/4xdLyZZJzL883AbiZvgyWKf2q55gcZiMgMkDNQMnyFJC/shdw-node"
 KEYGEN_URL = "https://shdw-drive.genesysgo.net/4xdLyZZJzL883AbiZvgyWKf2q55gcZiMgMkDNQMnyFJC/shdw-keygen-latest"
-SERVICE_NAME = "wield.service"
+SERVICE_NAME = "shdw-node.service"
 CONFIG_FILE = "/home/dagger/config.toml"
 TRUSTED_NODES = [
     "184.154.98.116:2030",
@@ -71,7 +71,7 @@ peers_db = "dbs/peers.db"
 def get_current_version():
     try:
         output = subprocess.check_output(
-            ['/home/dagger/wield', '--version'], stderr=subprocess.STDOUT)
+            [SHDW_NODE_PATH, '--version'], stderr=subprocess.STDOUT)
         # Python3ではoutputはbytes型なので、decodeして文字列に変換
         output = output.decode('utf-8')
         return output.split()[1]
@@ -80,12 +80,15 @@ def get_current_version():
 
 
 def download_latest_version():
-    process_run(f'sudo -S systemctl stop {SERVICE_NAME}')
-    process_run(f'rm "{WIELD_PATH}"', check=False)
-    process_run(f'wget -O "{WIELD_PATH}" "{WIELD_URL}"')
-    process_run(f'chmod +x {WIELD_PATH}')
-    updated_version = get_current_version()
-    return updated_version
+    try:
+        process_run(f'sudo -S systemctl stop {SERVICE_NAME}')
+        process_run(f'rm "{SHDW_NODE_PATH}"', check=False)
+        process_run(f'wget -O "{SHDW_NODE_PATH}" "{SHDW_NODE_URL}"')
+        process_run(f'chmod +x {SHDW_NODE_PATH}')
+        updated_version = get_current_version()
+        return updated_version
+    except Exception as e:
+        return 0
 
 
 def get_node_status():
